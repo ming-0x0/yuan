@@ -13,18 +13,28 @@ type Rule interface {
 
 type Validator struct {
 	err error
+
+	// lastAssertFailed indicates whether the most recent Assert call failed.
+	// It is used to decide if Message() is allowed to override the error.
+	lastAssertFailed bool
 }
 
 // Assert validates the given rule immediately.
 //
-// If the validator already contains an error, the rule is skipped.
-// This method follows a fail-fast strategy and supports fluent chaining.
+// It follows a fail-fast strategy:
+//   - If a previous assertion has already failed, the rule is skipped.
+//   - If the rule fails, the validator stores the error and marks the last assertion as failed.
+//
+// This method supports fluent chaining.
 func (v *Validator) Assert(rule Rule) *Validator {
 	if v.err != nil {
+		// A previous assertion already failed; do not allow Message() to override anymore.
+		v.lastAssertFailed = false
 		return v
 	}
 
 	v.err = rule.Validate()
+	v.lastAssertFailed = v.err != nil
 	return v
 }
 
@@ -38,14 +48,27 @@ func (v *Validator) Error() string {
 	return v.err.Error()
 }
 
-// Message overrides the error message when validation has failed.
+// Message overrides the error message of the most recently failed assertion.
 //
-// It wraps the error with a domain InvalidArgument error.
+// It only takes effect when:
+//   - The last Assert call failed
+//   - And the current error has not already been wrapped as a DomainError
+//
+// The error is wrapped as a domain InvalidArgument error.
 func (v *Validator) Message(msg string) *Validator {
-	if v.err == nil {
+	if !v.lastAssertFailed || v.err == nil {
 		return v
 	}
+
+	// Avoid double-wrapping if Message() is called multiple times
+	// or the rule already returned a DomainError.
+	var domainErr *domainerrors.DomainError
+	if errors.As(v.err, &domainErr) {
+		return v
+	}
+
 	v.err = domainerrors.Wrap(domainerrors.InvalidArgument, errors.New(msg))
+	v.lastAssertFailed = true
 	return v
 }
 
