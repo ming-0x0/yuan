@@ -71,7 +71,7 @@ func (c *PostgresTestContainer) Terminate(ctx context.Context) error {
 	return nil
 }
 
-func (c *PostgresTestContainer) CreateSchema(ctx context.Context) error {
+func (c *PostgresTestContainer) Migrate(ctx context.Context) error {
 	if err := goose.SetDialect("postgres"); err != nil {
 		return err
 	}
