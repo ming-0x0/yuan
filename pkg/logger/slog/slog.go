@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/ming-0x0/yuan/pkg/logger"
 	"github.com/ming-0x0/yuan/pkg/logger/slog/handler"
 )
 
@@ -133,4 +134,9 @@ func (l *Logger) Attr(key string, value any) slog.Attr {
 		Key:   key,
 		Value: slog.AnyValue(value),
 	}
+}
+
+// With returns a Logger that includes the given attributes in each output operation.
+func (l *Logger) With(args ...any) logger.Logger {
+	return &Logger{Logger: l.Logger.With(args...)}
 }
