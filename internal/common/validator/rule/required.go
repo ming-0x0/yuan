@@ -6,19 +6,31 @@ import (
 	"unicode/utf8"
 )
 
-type required struct {
-	value string
+type required[V comparable] struct {
+	value V
 }
 
-func (r *required) Validate() error {
-	if utf8.RuneCountInString(strings.TrimSpace(r.value)) == 0 {
-		return errors.New("field is required")
+func (r *required[V]) Validate() error {
+	var (
+		zero V
+		err  = errors.New("field is required")
+	)
+	switch v := any(r.value).(type) {
+	case string:
+		if utf8.RuneCountInString(strings.TrimSpace(v)) == 0 {
+			return err
+		}
+	default:
+		if r.value == zero {
+			return err
+		}
 	}
 	return nil
 }
 
-func Required(value string) *required {
-	return &required{
+// Required returns a validator that ensures the value is neither empty nor the zero value.
+func Required[V comparable](value V) *required[V] {
+	return &required[V]{
 		value: value,
 	}
 }

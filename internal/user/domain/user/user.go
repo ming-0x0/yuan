@@ -17,7 +17,7 @@ func New(
 	email string,
 	username string,
 	hashPassword string,
-) *User {
+) (*User, error) {
 	user := &User{
 		id:           id,
 		email:        email,
@@ -26,10 +26,10 @@ func New(
 	}
 
 	if err := user.validate(); err != nil {
-		return nil
+		return nil, err
 	}
 
-	return user
+	return user, nil
 }
 
 func (u *User) ID() int64 {
@@ -46,8 +46,8 @@ func (u *User) Username() string {
 
 func (u *User) validate() error {
 	return validator.New().
-		Assert(rule.Required(u.email)).Message("invalid email").
-		Assert(rule.Required(u.username)).Message("invalid username").
-		Assert(rule.Required(u.hashPassword)).Message("invalid hash password").
+		Assert(rule.Required(u.email)).Yield("email is required").
+		Assert(rule.Required(u.username)).Yield("username is required").
+		Assert(rule.Required(u.hashPassword)).Yield("hash password is required").
 		Err()
 }

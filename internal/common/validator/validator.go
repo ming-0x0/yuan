@@ -2,8 +2,6 @@ package validator
 
 import (
 	"errors"
-
-	domainerrors "github.com/ming-0x0/yuan/internal/common/domain/errors"
 )
 
 type Rule interface {
@@ -15,7 +13,7 @@ type Validator struct {
 	err error
 
 	// lastAssertFailed indicates whether the most recent Assert call failed.
-	// It is used to decide if Message() is allowed to override the error.
+	// It is used to decide if Yield() is allowed to override the error.
 	lastAssertFailed bool
 }
 
@@ -28,7 +26,7 @@ type Validator struct {
 // This method supports fluent chaining.
 func (v *Validator) Assert(rule Rule) *Validator {
 	if v.err != nil {
-		// A previous assertion already failed; do not allow Message() to override anymore.
+		// A previous assertion already failed; do not allow Yield() to override anymore.
 		v.lastAssertFailed = false
 		return v
 	}
@@ -48,26 +46,13 @@ func (v *Validator) Error() string {
 	return v.err.Error()
 }
 
-// Message overrides the error message of the most recently failed assertion.
-//
-// It only takes effect when:
-//   - The last Assert call failed
-//   - And the current error has not already been wrapped as a DomainError
-//
-// The error is wrapped as a domain InvalidArgument error.
-func (v *Validator) Message(msg string) *Validator {
+// Yield overrides the error message of the most recently failed assertion.
+func (v *Validator) Yield(msg string) *Validator {
 	if !v.lastAssertFailed || v.err == nil {
 		return v
 	}
 
-	// Avoid double-wrapping if Message() is called multiple times
-	// or the rule already returned a DomainError.
-	var domainErr *domainerrors.DomainError
-	if errors.As(v.err, &domainErr) {
-		return v
-	}
-
-	v.err = domainerrors.Wrap(domainerrors.InvalidArgument, errors.New(msg))
+	v.err = errors.New(msg)
 	v.lastAssertFailed = true
 	return v
 }
