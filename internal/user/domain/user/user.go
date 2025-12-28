@@ -44,8 +44,13 @@ func (u *User) Username() string {
 	return u.username
 }
 
+func (u *User) HashPassword() string {
+	return u.hashPassword
+}
+
 func (u *User) validate() error {
 	return validator.New().
+		Assert(rule.Required(u.id)).Yield("id is required").
 		Assert(rule.Required(u.email)).Yield("email is required").
 		Assert(rule.Required(u.username)).Yield("username is required").
 		Assert(rule.Required(u.hashPassword)).Yield("hash password is required").

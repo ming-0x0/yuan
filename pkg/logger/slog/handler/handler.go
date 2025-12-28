@@ -67,7 +67,6 @@ func NewJSONHandler(writer io.Writer, opts *slog.HandlerOptions) *Handler {
 		buffer: buffer,
 		handler: slog.NewJSONHandler(buffer, &slog.HandlerOptions{
 			Level:       opts.Level,
-			AddSource:   true,
 			ReplaceAttr: opts.ReplaceAttr,
 		}),
 		mutex:  &sync.Mutex{},

@@ -7,21 +7,29 @@ import (
 	"time"
 
 	"github.com/ming-0x0/yuan/pkg/logger"
+	sloglogger "github.com/ming-0x0/yuan/pkg/logger/slog"
 	"github.com/uptrace/bun"
 )
 
+type Driver string
+
+const (
+	Slog   Driver = "slog"
+	Logrus Driver = "logrus"
+)
+
 type Logger struct {
-	driver            string
+	driver            Driver
 	logger            logger.Logger
 	slowThreshold     time.Duration
 	ignoreNoRowsError bool
-	level             string
+	level             logger.Level
 }
 
 type Option func(*Logger)
 
 // WithDriver sets the driver for the logger (slog or logrus)
-func WithDriver(driver string) Option {
+func WithDriver(driver Driver) Option {
 	return func(l *Logger) {
 		l.driver = driver
 	}
@@ -51,21 +59,28 @@ func WithIgnoreNoRowsError() Option {
 // WithLevel sets the level for the bun logger
 func WithLevel(level string) Option {
 	return func(l *Logger) {
-		l.level = level
+		l.level = logger.ParseLevel(level)
 	}
 }
 
 // New creates a new bun logger with default options (driver: slog, slowThreshold: 0, ignoreNoRowsError: false)
 func New(opts ...Option) *Logger {
-	logger := &Logger{
-		driver:            "slog",
+	l := &Logger{
+		driver:            Slog,
 		ignoreNoRowsError: false,
+		level:             logger.Info,
 	}
 	for _, opt := range opts {
-		opt(logger)
+		opt(l)
 	}
 
-	return logger
+	if l.logger == nil {
+		if l.driver == Slog {
+			l.logger = sloglogger.New()
+		}
+	}
+
+	return l
 }
 
 var _ bun.QueryHook = (*Logger)(nil)
@@ -96,14 +111,20 @@ func (l *Logger) AfterQuery(ctx context.Context, event *bun.QueryEvent) {
 		keyVals = append(keyVals, "error", event.Err.Error())
 	}
 
-	keyVals = append(keyVals, "orm", "bun")
+	keyVals = append(keyVals, "service", "database")
 
 	switch {
 	case event.Err != nil && (!errors.Is(event.Err, sql.ErrNoRows) || !l.ignoreNoRowsError):
-		l.logger.ErrorContext(ctx, "SQL Query failed", keyVals...)
+		if l.level.Priority() >= logger.Error.Priority() {
+			l.logger.ErrorContext(ctx, "SQL Query failed", keyVals...)
+		}
 	case l.slowThreshold != 0 && elapsed > l.slowThreshold:
-		l.logger.WarnContext(ctx, "Performed SLOW SQL Query", keyVals...)
+		if l.level.Priority() >= logger.Warn.Priority() {
+			l.logger.WarnContext(ctx, "Performed SLOW SQL Query", keyVals...)
+		}
 	default:
-		l.logger.InfoContext(ctx, "Performed SQL Query", keyVals...)
+		if l.level.Priority() >= logger.Info.Priority() {
+			l.logger.InfoContext(ctx, "Performed SQL Query", keyVals...)
+		}
 	}
 }

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"os"
+
 	"github.com/ming-0x0/yuan/config"
 	"github.com/ming-0x0/yuan/infrastructure/database/postgres"
-	logruslogger "github.com/ming-0x0/yuan/pkg/logger/logrus"
+	sloglogger "github.com/ming-0x0/yuan/pkg/logger/slog"
 )
 
 func main() {
@@ -12,8 +14,9 @@ func main() {
 		panic(err)
 	}
 
-	logger := logruslogger.New(
-		logruslogger.WithLevel(config.Logger.Level),
+	logger := sloglogger.New(
+		sloglogger.WithLevel(config.Logger.Level),
+		sloglogger.WithWriter(os.Stdout),
 	)
 
 	db, err := postgres.New(
@@ -34,6 +37,5 @@ func main() {
 			logger.Error("Error while closing the PostgreSQL DB connection pool", "error", err)
 		}
 	}()
-
 	logger.Info("PostgreSQL DB connection pool closed successfully")
 }

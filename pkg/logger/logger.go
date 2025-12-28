@@ -5,12 +5,41 @@ import "context"
 type Level string
 
 const (
-	FatalLevel Level = "fatal"
-	ErrorLevel Level = "error"
-	WarnLevel  Level = "warn"
-	InfoLevel  Level = "info"
-	DebugLevel Level = "debug"
+	Fatal Level = "fatal"
+	Error Level = "error"
+	Warn  Level = "warn"
+	Info  Level = "info"
+	Debug Level = "debug"
 )
+
+// Priority returns the numeric priority of the log level.
+// Higher values mean more severe levels.
+func (l Level) Priority() int {
+	switch l {
+	case Fatal:
+		return 100
+	case Error:
+		return 80
+	case Warn:
+		return 60
+	case Info:
+		return 40
+	case Debug:
+		return 20
+	default:
+		return 0
+	}
+}
+
+// ParseLevel parses a string into a Level.
+func ParseLevel(s string) Level {
+	switch Level(s) {
+	case Fatal, Error, Warn, Info, Debug:
+		return Level(s)
+	default:
+		return Info
+	}
+}
 
 type Logger interface {
 	// Fatal logs a message with level Fatal on the logger then calls os.Exit(1)
@@ -34,5 +63,5 @@ type Logger interface {
 	// DebugContext logs a message with level Debug on the logger
 	DebugContext(ctx context.Context, msg string, keyVals ...any)
 	// With returns a Logger that includes the given attributes in each output operation.
-	With(keyVals ...any) Logger
+	WithFields(keyVals ...any) Logger
 }
