@@ -2,8 +2,8 @@
 
 # Migration directory
 GOOSE_DRIVER="postgres"
-GOOSE_MIGRATION_DIR="infrastructure/db/migrations"
-GOOSE_DBSTRING="postgres://ambassador:ambassador@localhost:5432/ambassador?sslmode=disable"
+GOOSE_MIGRATION_DIR="infrastructure/database/postgres/migrations"
+GOOSE_DBSTRING="postgres://yuan:password@localhost:5432/yuan?sslmode=disable"
 
 # Check if Goose is installed
 if ! command -v goose &> /dev/null

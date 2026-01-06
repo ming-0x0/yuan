@@ -1,41 +1,31 @@
 .PHONY: goose-up goose-down-to goose-create goose-down
 goose-up:
-	@if [ -z "$(word 1,$(filter-out $@,$(MAKECMDGOALS)))" ]; then \
-		echo "Error: Please provide the database driver (e.g., make goose-up postgres)"; \
-		exit 1; \
-	fi
-	@echo "Applying migrations for $(word 1,$(filter-out $@,$(MAKECMDGOALS)))..."
+	@echo "Applying migrations..."
 	@chmod +x ./scripts/goose.sh
-	@./scripts/goose.sh $(word 1,$(filter-out $@,$(MAKECMDGOALS))) up
+	@./scripts/goose.sh up
 
 goose-down-to:
-	@if [ -z "$(word 1,$(filter-out $@,$(MAKECMDGOALS)))" ] || [ -z "$(word 2,$(filter-out $@,$(MAKECMDGOALS)))" ]; then \
-		echo "Error: Please provide the database driver and version (e.g., make goose-down-to postgres 00001)"; \
+	@if [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		echo "Error: Please provide the migration version (e.g., make goose-down-to 00001)"; \
 		exit 1; \
 	fi
-	@echo "Rolling back $(word 1,$(filter-out $@,$(MAKECMDGOALS))) to migration $(word 2,$(filter-out $@,$(MAKECMDGOALS)))..."
+	@echo "Rolling back to migration $(filter-out $@,$(MAKECMDGOALS))..."
 	@chmod +x ./scripts/goose.sh
-	@./scripts/goose.sh $(word 1,$(filter-out $@,$(MAKECMDGOALS))) down-to $(word 2,$(filter-out $@,$(MAKECMDGOALS)))
+	@./scripts/goose.sh down-to $(filter-out $@,$(MAKECMDGOALS))
 
 goose-create:
-	@if [ -z "$(word 1,$(filter-out $@,$(MAKECMDGOALS)))" ] || [ -z "$(word 2,$(filter-out $@,$(MAKECMDGOALS)))" ]; then \
-		echo "Error: Please provide the database driver and migration name (e.g., make goose-create postgres my_migration)"; \
+	@if [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		echo "Error: Please provide the migration name (e.g., make goose-create my_migration)"; \
 		exit 1; \
 	fi
-	@echo "Creating migration $(word 2,$(filter-out $@,$(MAKECMDGOALS))) for $(word 1,$(filter-out $@,$(MAKECMDGOALS)))..."
+	@echo "Creating migration $(filter-out $@,$(MAKECMDGOALS))..."
 	@chmod +x ./scripts/goose.sh
-	@./scripts/goose.sh $(word 1,$(filter-out $@,$(MAKECMDGOALS))) create $(word 2,$(filter-out $@,$(MAKECMDGOALS)))
+	@./scripts/goose.sh create $(filter-out $@,$(MAKECMDGOALS))
 
 goose-down:
-	@if [ -z "$(word 1,$(filter-out $@,$(MAKECMDGOALS)))" ]; then \
-		echo "Error: Please provide the database driver (e.g., make goose-down postgres)"; \
-		exit 1; \
-	fi
-	@echo "Rolling the last migration for $(word 1,$(filter-out $@,$(MAKECMDGOALS)))..."
+	@echo "Rolling the last migration..."
 	@chmod +x ./scripts/goose.sh
-	@./scripts/goose.sh $(word 1,$(filter-out $@,$(MAKECMDGOALS))) down
-
-
+	@./scripts/goose.sh down
 
 .PHONY: test coverage
 # Run tests
