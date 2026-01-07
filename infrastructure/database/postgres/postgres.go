@@ -17,40 +17,40 @@ type config struct {
 	connMaxIdleTime int
 }
 
-func WithDSN(host string, port int, user string, password string, dbname string, sslMode string) Option {
+func WithDSN(host string, port int, user string, password string, dbName string, sslMode string) option {
 	return func(cfg *config) {
 		cfg.dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			host, strconv.Itoa(port), user, password, dbname, sslMode)
+			host, strconv.Itoa(port), user, password, dbName, sslMode)
 	}
 }
 
-func WithMaxOpenConns(maxOpenConns int) Option {
+func WithMaxOpenConns(maxOpenConns int) option {
 	return func(cfg *config) {
 		cfg.maxOpenConns = maxOpenConns
 	}
 }
 
-func WithMaxIdleConns(maxIdleConns int) Option {
+func WithMaxIdleConns(maxIdleConns int) option {
 	return func(cfg *config) {
 		cfg.maxIdleConns = maxIdleConns
 	}
 }
 
-func WithConnMaxLifetime(connMaxLifetime int) Option {
+func WithConnMaxLifetime(connMaxLifetime int) option {
 	return func(cfg *config) {
 		cfg.connMaxLifetime = connMaxLifetime
 	}
 }
 
-func WithConnMaxIdleTime(connMaxIdleTime int) Option {
+func WithConnMaxIdleTime(connMaxIdleTime int) option {
 	return func(cfg *config) {
 		cfg.connMaxIdleTime = connMaxIdleTime
 	}
 }
 
-type Option func(*config)
+type option func(*config)
 
-func New(opts ...Option) (*sql.DB, error) {
+func New(opts ...option) (*sql.DB, error) {
 	cfg := &config{
 		maxOpenConns:    10,
 		maxIdleConns:    10,

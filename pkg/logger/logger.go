@@ -17,38 +17,44 @@ type config struct {
 	writer io.Writer
 }
 
-type Option func(*config)
+type option func(*config)
 
-func WithLevel(level string) Option {
+func WithLevel(level string) option {
 	return func(c *config) {
 		c.level = level
 	}
 }
 
-func WithWriter(writer io.Writer) Option {
+func WithWriter(writer io.Writer) option {
 	return func(c *config) {
 		c.writer = writer
 	}
 }
 
 const (
+	Panic = slog.Level(16)
 	Fatal = slog.Level(12)
 	Error = slog.Level(8)
 	Warn  = slog.Level(4)
 	Info  = slog.Level(0)
 	Debug = slog.Level(-4)
+	Trace = slog.Level(-8)
 )
 
 var levelNames = map[slog.Leveler]string{
+	Panic: "panic",
 	Fatal: "fatal",
 	Error: "error",
 	Warn:  "warn",
 	Info:  "info",
 	Debug: "debug",
+	Trace: "trace",
 }
 
 func getLogLevel(logLevel string) slog.Level {
 	switch logLevel {
+	case "panic":
+		return Panic
 	case "fatal":
 		return Fatal
 	case "error":
@@ -59,6 +65,8 @@ func getLogLevel(logLevel string) slog.Level {
 		return Info
 	case "debug":
 		return Debug
+	case "trace":
+		return Trace
 	default:
 		return Info
 	}
@@ -68,7 +76,7 @@ type Logger struct {
 	*slog.Logger
 }
 
-func New(opts ...Option) *Logger {
+func New(opts ...option) *Logger {
 	cfg := &config{
 		level:  "info",
 		writer: os.Stdout,
@@ -119,15 +127,27 @@ func (l *Logger) log(ctx context.Context, level slog.Level, msg string, keyVals 
 	l.Logger.Log(ctx, level, msg, attrs...)
 }
 
+// Panic logs a message with level Panic on the logger then calls panic()
+func (l *Logger) Panic(msg string, keyVals ...any) {
+	l.log(context.Background(), Panic, msg, keyVals...)
+	panic(msg)
+}
+
+// PanicContext logs a message with level Panic on the logger then calls panic()
+func (l *Logger) PanicContext(ctx context.Context, msg string, keyVals ...any) {
+	l.log(ctx, Panic, msg, keyVals...)
+	panic(msg)
+}
+
 // Fatal logs a message with level Fatal on the logger then calls os.Exit(1)
-func (l *Logger) Fatal(msg string, attrs ...any) {
-	l.log(context.Background(), Fatal, msg, attrs...)
+func (l *Logger) Fatal(msg string, keyVals ...any) {
+	l.log(context.Background(), Fatal, msg, keyVals...)
 	os.Exit(1)
 }
 
 // FatalContext logs a message with level Fatal on the logger then calls os.Exit(1)
-func (l *Logger) FatalContext(ctx context.Context, msg string, attrs ...any) {
-	l.log(ctx, Fatal, msg, attrs...)
+func (l *Logger) FatalContext(ctx context.Context, msg string, keyVals ...any) {
+	l.log(ctx, Fatal, msg, keyVals...)
 	os.Exit(1)
 }
 
@@ -161,6 +181,14 @@ func (l *Logger) Debug(msg string, keyVals ...any) {
 
 func (l *Logger) DebugContext(ctx context.Context, msg string, keyVals ...any) {
 	l.log(ctx, Debug, msg, keyVals...)
+}
+
+func (l *Logger) Trace(msg string, keyVals ...any) {
+	l.log(context.Background(), Trace, msg, keyVals...)
+}
+
+func (l *Logger) TraceContext(ctx context.Context, msg string, keyVals ...any) {
+	l.log(ctx, Trace, msg, keyVals...)
 }
 
 func toAttrs(keyVals ...any) []any {
