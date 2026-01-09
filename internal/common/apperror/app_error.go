@@ -154,3 +154,7 @@ func Is(code ErrorCode, err error) bool {
 
 	return false
 }
+
+func As(err error, target any) bool {
+	return errors.As(err, target)
+}

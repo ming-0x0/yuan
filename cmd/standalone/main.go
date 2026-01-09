@@ -1,9 +1,13 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/ming-0x0/yuan/adapter/persistence/postgres/account"
+	"github.com/ming-0x0/yuan/adapter/persistence/postgres/client"
+	restadapter "github.com/ming-0x0/yuan/adapter/rest"
+	accounthandler "github.com/ming-0x0/yuan/adapter/rest/account"
 	"github.com/ming-0x0/yuan/config"
 	"github.com/ming-0x0/yuan/infrastructure/database/postgres"
+	accountapp "github.com/ming-0x0/yuan/internal/account/app/account"
 	"github.com/ming-0x0/yuan/pkg/logger"
 )
 
@@ -30,22 +34,23 @@ func main() {
 	}
 
 	logger.Info("Connected to database successfully.")
+	defer postgres.Close(pgDB)
 
-	// Dependency Injection with Wire
-	handler, err := InitializeApp(pgDB)
-	if err != nil {
-		logger.Fatal("Failed to initialize application", "error", err)
-	}
+	// Adapters
+	pgClient := client.New(pgDB)
+	accountRepo := account.New(pgClient, logger)
+
+	// App Services
+	accountApp := accountapp.New(accountRepo)
+
+	// Handlers
+	accountHandler := accounthandler.NewHandler(accountApp)
 
 	// Router
-	r := gin.Default()
-	r.POST("/register", handler.Register)
-	r.POST("/login", handler.Login)
+	router := restadapter.NewRouter(accountHandler)
 
-	logger.Info("Starting server on :8080")
-	if err := r.Run(":8080"); err != nil {
-		logger.Fatal("Failed to start server", "error", err)
+	logger.Info("Starting HTTP server...", "port", cfg.HTTPServer.Port)
+	if err := router.Run(cfg.HTTPServer.Port); err != nil {
+		logger.Fatal("Failed to start HTTP server", "error", err)
 	}
-
-	defer postgres.Close(pgDB)
 }

@@ -1,10 +1,9 @@
 package app
 
 import (
-	"context"
 	"time"
 
-	"github.com/ming-0x0/yuan/internal/account/domain"
+	"github.com/ming-0x0/yuan/internal/account/domain/account"
 	"github.com/sony/sonyflake/v2"
 	"github.com/sony/sonyflake/v2/awsutil"
 )
@@ -24,10 +23,14 @@ func init() {
 	}
 }
 
-type AccountApp interface {
-	CreateAccount(ctx context.Context, email string, password string) error
+type AccountApp struct {
+	accountRepo account.AccountRepository
 }
 
-type accountApp struct {
-	accountRepo domain.AccountRepository
+func New(
+	accountRepo account.AccountRepository,
+) *AccountApp {
+	return &AccountApp{
+		accountRepo: accountRepo,
+	}
 }

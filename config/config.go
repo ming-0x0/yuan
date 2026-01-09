@@ -21,8 +21,9 @@ func (e Env) IsProd() bool {
 
 type Config struct {
 	Env      Env             `toml:"env" mapstructure:"env"`
-	Logger   *LoggerConfig   `toml:"logger" mapstructure:"logger"`
-	Postgres *PostgresConfig `toml:"postgres" mapstructure:"postgres"`
+	Logger     *LoggerConfig     `toml:"logger" mapstructure:"logger"`
+	Postgres   *PostgresConfig   `toml:"postgres" mapstructure:"postgres"`
+	HTTPServer *HTTPServerConfig `toml:"http_server" mapstructure:"http_server"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -46,4 +47,8 @@ func LoadConfig() (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+type HTTPServerConfig struct {
+	Port int `toml:"port" mapstructure:"port"`
 }
