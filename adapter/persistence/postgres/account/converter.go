@@ -6,12 +6,12 @@ import (
 )
 
 func ToDomain(src *internal.Account) (*account.Account, error) {
-	return account.New(src.ID, src.Email, src.Password)
+	return account.New(src.Email, src.Password)
 }
 
 func ToModel(src *account.Account) (*internal.Account, error) {
 	return &internal.Account{
-		ID:       src.ID(),
+		ID:       src.ID().Int64(),
 		Email:    src.Email(),
 		Password: src.HashedPassword(),
 	}, nil

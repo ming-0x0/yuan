@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/ming-0x0/yuan/internal/common/domain/id"
 	"github.com/ming-0x0/yuan/internal/common/validator"
 	"github.com/ming-0x0/yuan/internal/common/validator/rule"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AccountApp interface {
@@ -21,12 +21,12 @@ type AccountRepository interface {
 }
 
 type Account struct {
-	id             int64
+	id             id.ID
 	email          string
 	hashedPassword string
 }
 
-func (a *Account) ID() int64 {
+func (a *Account) ID() id.ID {
 	return a.id
 }
 
@@ -38,15 +38,15 @@ func (a *Account) HashedPassword() string {
 	return a.hashedPassword
 }
 
-func (a *Account) VerifyPassword(password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(a.hashedPassword), []byte(password))
-}
-
 func New(
-	id int64,
 	email string,
 	password string,
 ) (*Account, error) {
+	id, err := id.New()
+	if err != nil {
+		return nil, err
+	}
+
 	account := &Account{
 		id:             id,
 		email:          email,

@@ -9,17 +9,12 @@ import (
 )
 
 func (a *AccountApp) CreateAccount(ctx context.Context, email string, password string) error {
-	accountID, err := sf.NextID()
-	if err != nil {
-		return apperror.WithCause(apperror.Internal, err)
-	}
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return apperror.WithCause(apperror.Internal, err)
 	}
 
-	account, err := account.New(accountID, email, string(hashedPassword))
+	account, err := account.New(email, string(hashedPassword))
 	if err != nil {
 		return apperror.WithCause(apperror.InvalidArgument, err)
 	}

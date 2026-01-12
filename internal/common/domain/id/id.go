@@ -1,0 +1,38 @@
+package id
+
+import (
+	"time"
+
+	"github.com/sony/sonyflake/v2"
+	"github.com/sony/sonyflake/v2/awsutil"
+)
+
+var sf *sonyflake.Sonyflake
+
+func init() {
+	st := sonyflake.Settings{
+		MachineID: awsutil.AmazonEC2MachineID,
+		TimeUnit:  time.Millisecond,
+		StartTime: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+	}
+	var err error
+	sf, err = sonyflake.New(st)
+	if err != nil {
+		panic(err)
+	}
+}
+
+type ID int64
+
+func (id ID) Int64() int64 {
+	return int64(id)
+}
+
+func New() (ID, error) {
+	id, err := sf.NextID()
+	if err != nil {
+		return ID(0), err
+	}
+
+	return ID(id), nil
+}

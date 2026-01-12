@@ -6,6 +6,7 @@ import (
 
 	"github.com/ming-0x0/yuan/internal/account/domain/account"
 	"github.com/ming-0x0/yuan/internal/common/apperror"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (a *AccountApp) Login(ctx context.Context, email string, password string) (*account.Account, error) {
@@ -17,7 +18,7 @@ func (a *AccountApp) Login(ctx context.Context, email string, password string) (
 		return nil, apperror.WithCause(apperror.Internal, err)
 	}
 
-	if err := acc.VerifyPassword(password); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(acc.HashedPassword()), []byte(password)); err != nil {
 		return nil, apperror.WithCause(apperror.Unauthenticated, err)
 	}
 

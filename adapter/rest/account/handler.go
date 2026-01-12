@@ -3,15 +3,17 @@ package account
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ming-0x0/yuan/internal/account/domain/account"
+	"github.com/ming-0x0/yuan/internal/common/validator"
 	"github.com/ming-0x0/yuan/pkg/rest"
 )
 
 type AccountHandler struct {
 	accountApp account.AccountApp
+	validator  *validator.Validator
 }
 
 func NewHandler(accountApp account.AccountApp) *AccountHandler {
-	return &AccountHandler{accountApp: accountApp}
+	return &AccountHandler{accountApp: accountApp, validator: validator.New()}
 }
 
 type CreateAccountRequest struct {
