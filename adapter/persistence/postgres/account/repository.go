@@ -7,7 +7,7 @@ import (
 
 	"github.com/ming-0x0/yuan/adapter/persistence/postgres/client"
 	"github.com/ming-0x0/yuan/adapter/persistence/postgres/internal"
-	"github.com/ming-0x0/yuan/internal/account/domain/account"
+	"github.com/ming-0x0/yuan/internal/auth/domain/account"
 	"github.com/ming-0x0/yuan/pkg/logger"
 	"github.com/uptrace/bun"
 )

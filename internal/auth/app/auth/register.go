@@ -1,14 +1,23 @@
-package app
+package auth
 
 import (
 	"context"
 
-	"github.com/ming-0x0/yuan/internal/account/domain/account"
+	"github.com/ming-0x0/yuan/internal/auth/domain/account"
 	"github.com/ming-0x0/yuan/internal/common/apperror"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (a *AccountApp) CreateAccount(ctx context.Context, email string, password string) error {
+func (a *AuthApp) Register(ctx context.Context, email string, password string) error {
+	acc, err := a.accountRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return apperror.WithCause(apperror.Internal, err)
+	}
+
+	if acc != nil {
+		return apperror.WithCause(apperror.AlreadyExists, err)
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return apperror.WithCause(apperror.Internal, err)

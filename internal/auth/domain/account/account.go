@@ -2,7 +2,6 @@ package account
 
 import (
 	"context"
-	"errors"
 
 	"github.com/ming-0x0/yuan/internal/common/domain/id"
 	"github.com/ming-0x0/yuan/internal/common/validator"
@@ -10,9 +9,8 @@ import (
 )
 
 type AccountApp interface {
-	CreateAccount(ctx context.Context, email string, password string) error
-	Login(ctx context.Context, email string, password string) (*Account, error)
-	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
+	Create(ctx context.Context, account *Account) error
+	FindByEmail(ctx context.Context, email string) (*Account, error)
 }
 
 type AccountRepository interface {
@@ -59,15 +57,11 @@ func New(
 	return account, nil
 }
 
-var (
-	ErrAccountNotFound = errors.New("account not found")
-)
-
 func (a *Account) validate() error {
 	return validator.New().
 		Assert(rule.Required(a.id)).
-		Assert(rule.Required(a.email)).Yield("email is required").
-		Assert(rule.IsEmail(a.email)).Yield("email is invalid").
+		Assert(rule.Required(a.email)).
+		Assert(rule.IsEmail(a.email)).
 		Assert(rule.Required(a.hashedPassword)).
 		Err()
 }

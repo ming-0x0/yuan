@@ -36,3 +36,11 @@ func New() (ID, error) {
 
 	return ID(id), nil
 }
+
+func MustNew() ID {
+	id, err := New()
+	if err != nil {
+		panic(err)
+	}
+	return id
+}

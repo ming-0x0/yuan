@@ -25,13 +25,11 @@ func _() {
 	_ = x[Unavailable-14]
 	_ = x[DataLoss-15]
 	_ = x[Unauthenticated-16]
-	_ = x[TokenExpired-17]
-	_ = x[InvalidToken-18]
 }
 
-const _ErrorCode_name = "OKCanceledUnknownInvalidArgumentDeadlineExceededNotFoundAlreadyExistsPermissionDeniedResourceExhaustedFailedPreconditionAbortedOutOfRangeUnimplementedInternalUnavailableDataLossUnauthenticatedTokenExpiredInvalidToken"
+const _ErrorCode_name = "OKCanceledUnknownInvalidArgumentDeadlineExceededNotFoundAlreadyExistsPermissionDeniedResourceExhaustedFailedPreconditionAbortedOutOfRangeUnimplementedInternalUnavailableDataLossUnauthenticated"
 
-var _ErrorCode_index = [...]uint8{0, 2, 10, 17, 32, 48, 56, 69, 85, 102, 120, 127, 137, 150, 158, 169, 177, 192, 204, 216}
+var _ErrorCode_index = [...]uint8{0, 2, 10, 17, 32, 48, 56, 69, 85, 102, 120, 127, 137, 150, 158, 169, 177, 192}
 
 func (i ErrorCode) String() string {
 	idx := int(i) - 0

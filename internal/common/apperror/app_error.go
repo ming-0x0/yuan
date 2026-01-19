@@ -59,12 +59,6 @@ const (
 
 	// Unauthenticated indicates authentication is required.
 	Unauthenticated
-
-	// TokenExpired indicates an authentication token has expired.
-	TokenExpired
-
-	// InvalidToken indicates an authentication token is invalid.
-	InvalidToken
 )
 
 // AppError represents an application-level error with a classified error code.
