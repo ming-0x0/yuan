@@ -10,13 +10,11 @@ import (
 var sf *sonyflake.Sonyflake
 
 func init() {
-	st := sonyflake.Settings{
-		MachineID: awsutil.AmazonEC2MachineID,
-		TimeUnit:  time.Millisecond,
-		StartTime: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
-	}
 	var err error
-	sf, err = sonyflake.New(st)
+	sf, err = sonyflake.New(sonyflake.Settings{
+		StartTime: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+		MachineID: awsutil.AmazonEC2MachineID,
+	})
 	if err != nil {
 		panic(err)
 	}
@@ -24,14 +22,10 @@ func init() {
 
 type ID int64
 
-func (id ID) Int64() int64 {
-	return int64(id)
-}
-
 func New() (ID, error) {
 	id, err := sf.NextID()
 	if err != nil {
-		return ID(0), err
+		return 0, err
 	}
 
 	return ID(id), nil

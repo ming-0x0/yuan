@@ -1,11 +1,10 @@
-package apperror
+package errors
 
 import "errors"
 
 //go:generate go tool stringer -type=ErrorCode
 
 // ErrorCode represents a classified application-level error code.
-// It is transport-agnostic and can be mapped to HTTP / gRPC status later.
 type ErrorCode int
 
 const (
