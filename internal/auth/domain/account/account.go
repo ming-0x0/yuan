@@ -1,10 +1,17 @@
 package account
 
 import (
+	"context"
+
 	"github.com/ming-0x0/yuan/internal/common/domain/id"
 	"github.com/ming-0x0/yuan/internal/common/validator"
 	"github.com/ming-0x0/yuan/internal/common/validator/rule"
 )
+
+type AccountRepositoryInterface interface {
+	Create(ctx context.Context, account *Account) error
+	FindByEmail(ctx context.Context, email string) (*Account, error)
+}
 
 type Account struct {
 	id             id.ID
@@ -13,6 +20,23 @@ type Account struct {
 }
 
 func New(
+	email string,
+	hashedPassword string,
+) (*Account, error) {
+	account := &Account{
+		id:             id.MustNew(),
+		email:          email,
+		hashedPassword: hashedPassword,
+	}
+
+	if err := account.validate(); err != nil {
+		return nil, err
+	}
+
+	return account, nil
+}
+
+func FromRepository(
 	id id.ID,
 	email string,
 	hashedPassword string,

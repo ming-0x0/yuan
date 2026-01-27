@@ -22,6 +22,10 @@ func init() {
 
 type ID int64
 
+func (id ID) Int64() int64 {
+	return int64(id)
+}
+
 func New() (ID, error) {
 	id, err := sf.NextID()
 	if err != nil {
