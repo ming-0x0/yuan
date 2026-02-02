@@ -21,7 +21,7 @@ func New(client *client.Client, logger *logger.Logger) *AccountRepository {
 	return &AccountRepository{client: client, logger: logger}
 }
 
-func (r *AccountRepository) FindByEmail(ctx context.Context, email string) (*account.Account, error) {
+func (r *AccountRepository) FindByEmail(ctx context.Context, email string) (account.Account, error) {
 	internalAccount := new(internal.Account)
 
 	err := r.client.DB(ctx).NewSelect().Model(internalAccount).Where("? = ?", bun.Ident("email"), email).Scan(ctx)
@@ -35,7 +35,7 @@ func (r *AccountRepository) FindByEmail(ctx context.Context, email string) (*acc
 	return ToDomain(internalAccount)
 }
 
-func (r *AccountRepository) Create(ctx context.Context, account *account.Account) error {
+func (r *AccountRepository) Create(ctx context.Context, account account.Account) error {
 	internalAccount, err := ToInternal(account)
 	if err != nil {
 		return err

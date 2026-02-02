@@ -3,16 +3,17 @@ package account
 import (
 	"github.com/ming-0x0/yuan/adapter/persistence/postgres/internal"
 	"github.com/ming-0x0/yuan/internal/auth/domain/account"
+	"github.com/ming-0x0/yuan/internal/common/domain/id"
 )
 
-func ToDomain(src *internal.Account) (*account.Account, error) {
-	return account.New(src.Email, src.Password)
+func ToDomain(src *internal.Account) (account.Account, error) {
+	return account.FromRepository(id.FromInt64(src.ID), src.Email, src.Password)
 }
 
-func ToInternal(src *account.Account) (*internal.Account, error) {
+func ToInternal(src account.Account) (*internal.Account, error) {
 	return &internal.Account{
-		ID:       src.ID().Int64(),
-		Email:    src.Email(),
-		Password: src.HashedPassword(),
+		ID:       src.ID.Int64(),
+		Email:    src.Email,
+		Password: src.HashedPassword,
 	}, nil
 }

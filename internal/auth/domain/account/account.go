@@ -9,24 +9,26 @@ import (
 )
 
 type AccountRepositoryInterface interface {
-	Create(ctx context.Context, account *Account) error
-	FindByEmail(ctx context.Context, email string) (*Account, error)
+	Create(ctx context.Context, account Account) error
+	FindByEmail(ctx context.Context, email string) (Account, error)
 }
 
-type Account struct {
-	id             id.ID
-	email          string
-	hashedPassword string
+type Account = *account
+
+type account struct {
+	ID             id.ID
+	Email          string
+	HashedPassword string
 }
 
 func New(
 	email string,
 	hashedPassword string,
-) (*Account, error) {
-	account := &Account{
-		id:             id.MustNew(),
-		email:          email,
-		hashedPassword: hashedPassword,
+) (Account, error) {
+	account := &account{
+		ID:             id.MustNew(),
+		Email:          email,
+		HashedPassword: hashedPassword,
 	}
 
 	if err := account.validate(); err != nil {
@@ -40,11 +42,11 @@ func FromRepository(
 	id id.ID,
 	email string,
 	hashedPassword string,
-) (*Account, error) {
-	account := &Account{
-		id:             id,
-		email:          email,
-		hashedPassword: hashedPassword,
+) (Account, error) {
+	account := &account{
+		ID:             id,
+		Email:          email,
+		HashedPassword: hashedPassword,
 	}
 
 	if err := account.validate(); err != nil {
@@ -54,23 +56,11 @@ func FromRepository(
 	return account, nil
 }
 
-func (a *Account) ID() id.ID {
-	return a.id
-}
-
-func (a *Account) Email() string {
-	return a.email
-}
-
-func (a *Account) HashedPassword() string {
-	return a.hashedPassword
-}
-
-func (a *Account) validate() error {
+func (a *account) validate() error {
 	return validator.New().
-		Assert(rule.Required(a.id)).
-		Assert(rule.Required(a.email)).
-		Assert(rule.IsEmail(a.email)).
-		Assert(rule.Required(a.hashedPassword)).
+		Assert(rule.Required(a.ID)).
+		Assert(rule.Required(a.Email)).
+		Assert(rule.IsEmail(a.Email)).
+		Assert(rule.Required(a.HashedPassword)).
 		Err()
 }

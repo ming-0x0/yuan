@@ -26,6 +26,10 @@ func (id ID) Int64() int64 {
 	return int64(id)
 }
 
+func FromInt64(id int64) ID {
+	return ID(id)
+}
+
 func New() (ID, error) {
 	id, err := sf.NextID()
 	if err != nil {
