@@ -12,7 +12,7 @@ var sf *sonyflake.Sonyflake
 func init() {
 	var err error
 	sf, err = sonyflake.New(sonyflake.Settings{
-		StartTime: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+		StartTime: time.Date(2026, 1, 1, 0, 0, 0, 0, time.Local),
 		MachineID: awsutil.AmazonEC2MachineID,
 	})
 	if err != nil {
