@@ -27,8 +27,8 @@ type Config struct {
 
 func LoadConfig() (*Config, error) {
 	viper := viper.New()
-	viper.AddConfigPath("./config")
-	viper.SetConfigName("config")
+	viper.AddConfigPath("./configs")
+	viper.SetConfigName("configs")
 	viper.SetConfigType("toml")
 
 	if err := viper.ReadInConfig(); err != nil {

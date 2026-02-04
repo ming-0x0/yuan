@@ -8,7 +8,9 @@ import (
 
 type AccountRepository interface {
 	Create(ctx context.Context, account Account) error
+	Update(ctx context.Context, account Account) error
 	FindByEmail(ctx context.Context, email string) (Account, error)
+	FindByID(ctx context.Context, id id.ID) (Account, error)
 }
 
 type Account = *account

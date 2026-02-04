@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/ming-0x0/yuan/internal/common/domain/id"
 	"github.com/ming-0x0/yuan/internal/iam/adapter/repository/internal"
 	"github.com/ming-0x0/yuan/internal/iam/domain/account"
 	"github.com/ming-0x0/yuan/pkg/logger"
@@ -50,4 +51,30 @@ func (r *accountRepository) FindByEmail(ctx context.Context, email string) (acco
 	}
 
 	return ToDomain(acc)
+}
+
+func (r *accountRepository) FindByID(ctx context.Context, id id.ID) (account.Account, error) {
+	acc := new(internal.Account)
+
+	err := r.client.DB(ctx).NewSelect().Model(acc).Where("? = ?", bun.Ident("id"), id.Int64()).Scan(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, account.ErrAccountNotFound
+		}
+		return nil, err
+	}
+
+	return ToDomain(acc)
+}
+
+func (r *accountRepository) Update(ctx context.Context, account account.Account) error {
+	acc := ToInternal(account)
+	acc.UpdatedBy = account.ID.Int64()
+
+	_, err := r.client.DB(ctx).NewUpdate().Model(acc).WherePK().Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

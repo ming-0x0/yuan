@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/ming-0x0/yuan/internal/iam/domain/account"
 )
 
@@ -17,7 +19,13 @@ func (s *authService) Register(ctx context.Context, email string, password strin
 		return errors.New("account already exists")
 	}
 
-	acc, err = account.New(email, password)
+	// Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	acc, err = account.New(email, string(hashedPassword))
 	if err != nil {
 		return err
 	}

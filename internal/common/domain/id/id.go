@@ -1,6 +1,7 @@
 package id
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/sony/sonyflake/v2"
@@ -24,6 +25,10 @@ type ID int64
 
 func (id ID) Int64() int64 {
 	return int64(id)
+}
+
+func (id ID) String() string {
+	return strconv.FormatInt(int64(id), 10)
 }
 
 func FromInt64(id int64) ID {
