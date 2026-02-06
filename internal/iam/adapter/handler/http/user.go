@@ -21,8 +21,7 @@ func NewUserHandler(userService user.UserService) *UserHandler {
 }
 
 type updateProfileRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	FullName string `json:"full_name"`
 }
 
 func (h *UserHandler) UpdateProfile(c echo.Context) error {
@@ -31,12 +30,7 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	userID, err := getUserIDFromContext(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
-
-	if err := h.userService.UpdateProfile(c.Request().Context(), userID, req.Email, req.Password); err != nil {
+	if err := h.userService.UpdateProfile(c.Request().Context(), req.FullName); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -44,19 +38,15 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 }
 
 func (h *UserHandler) GetProfile(c echo.Context) error {
-	userID, err := getUserIDFromContext(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
-
-	acc, err := h.userService.GetProfile(c.Request().Context(), userID)
+	acc, err := h.userService.GetProfile(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"id":    acc.ID.String(),
-		"email": acc.Email,
+		"id":         acc.ID.String(),
+		"email":      acc.Email,
+		"full_name":  acc.FullName,
 	})
 }
 

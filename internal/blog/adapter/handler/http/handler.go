@@ -31,12 +31,8 @@ func (h *BlogHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	authorID, err := getUserIDFromContext(c)
+	_, err := h.service.Create(c.Request().Context(), req.Title, req.Content)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
-
-	if err := h.service.Create(c.Request().Context(), req.Title, req.Content, authorID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -50,22 +46,14 @@ type updateRequest struct {
 
 func (h *BlogHandler) Update(c echo.Context) error {
 	idStr := c.Param("id")
-	idInt, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
-	}
 
 	var req updateRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	authorID, err := getUserIDFromContext(c)
+	_, err := h.service.Update(c.Request().Context(), idStr, req.Title, req.Content)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
-
-	if err := h.service.Update(c.Request().Context(), id.FromInt64(idInt), req.Title, req.Content, authorID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -74,17 +62,8 @@ func (h *BlogHandler) Update(c echo.Context) error {
 
 func (h *BlogHandler) Delete(c echo.Context) error {
 	idStr := c.Param("id")
-	idInt, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
-	}
 
-	authorID, err := getUserIDFromContext(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
-	}
-
-	if err := h.service.Delete(c.Request().Context(), id.FromInt64(idInt), authorID); err != nil {
+	if err := h.service.Delete(c.Request().Context(), idStr); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -93,12 +72,8 @@ func (h *BlogHandler) Delete(c echo.Context) error {
 
 func (h *BlogHandler) Get(c echo.Context) error {
 	idStr := c.Param("id")
-	idInt, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
-	}
 
-	blog, err := h.service.Get(c.Request().Context(), id.FromInt64(idInt))
+	blog, err := h.service.Get(c.Request().Context(), idStr)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "not found")
 	}
@@ -110,12 +85,17 @@ func (h *BlogHandler) List(c echo.Context) error {
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 
-	blogs, err := h.service.List(c.Request().Context(), page, limit)
+	blogs, totalPages, totalItems, currentPage, err := h.service.List(c.Request().Context(), page, limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, blogs)
+	return c.JSON(http.StatusOK, map[string]any{
+		"blogs":         blogs,
+		"total_pages":   totalPages,
+		"total_items":   totalItems,
+		"current_page":  currentPage,
+	})
 }
 
 func getUserIDFromContext(c echo.Context) (id.ID, error) {

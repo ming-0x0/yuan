@@ -11,13 +11,15 @@ func ToDomain(src *internal.Account) (account.Account, error) {
 		id.FromInt64(src.ID),
 		src.Email,
 		src.Password,
+		src.FullName,
 	)
 }
 
 func ToInternal(src account.Account) *internal.Account {
 	return &internal.Account{
-		ID:       src.ID.Int64(),
-		Email:    src.Email,
-		Password: src.HashedPassword,
+		ID:        src.ID.Int64(),
+		Email:     src.Email,
+		Password:  src.HashedPassword,
+		FullName:  src.FullName,
 	}
 }

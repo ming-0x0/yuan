@@ -7,7 +7,7 @@ import (
 )
 
 type AuthService interface {
-	Register(ctx context.Context, email string, password string) error
+	Register(ctx context.Context, email string, password string, fullName string) error
 	Login(ctx context.Context, email string, password string) (string, error)
 }
 

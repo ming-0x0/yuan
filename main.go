@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/ming-0x0/yuan/configs"
 	blogHttp "github.com/ming-0x0/yuan/internal/blog/adapter/handler/http"
+	blogGrpc "github.com/ming-0x0/yuan/internal/blog/adapter/handler/grpc"
 	blogRepo "github.com/ming-0x0/yuan/internal/blog/adapter/persistence/postgres"
 	blog "github.com/ming-0x0/yuan/internal/blog/application"
 	authHttp "github.com/ming-0x0/yuan/internal/iam/adapter/handler/http"
+	authGrpc "github.com/ming-0x0/yuan/internal/iam/adapter/handler/grpc"
+	userGrpc "github.com/ming-0x0/yuan/internal/iam/adapter/handler/grpc"
 	accountRepo "github.com/ming-0x0/yuan/internal/iam/adapter/repository/account"
 	"github.com/ming-0x0/yuan/internal/iam/application/auth"
 	"github.com/ming-0x0/yuan/internal/iam/application/user"
@@ -22,6 +24,7 @@ import (
 	"github.com/ming-0x0/yuan/pkg/logger/slog"
 	"github.com/ming-0x0/yuan/pkg/orm/bun/client"
 	"github.com/ming-0x0/yuan/pkg/timezone"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -72,26 +75,64 @@ func main() {
 	userSvc := user.NewUserService(accRepo)
 	blogSvc := blog.NewBlogService(blogRepo)
 
-	// Initialize Handlers
+	// Initialize HTTP Handlers
 	authHandler := authHttp.NewAuthHandler(authSvc)
 	userHandler := authHttp.NewUserHandler(userSvc)
 	blogHandler := blogHttp.NewBlogHandler(blogSvc)
 
-	// Initialize Server
-	srv := server.NewServer()
+	// Initialize HTTP Server
+	httpSrv := server.NewServer()
 
 	// Register Routes
-	apiGroup := srv.Echo().Group("/api/v1")
+	apiGroup := httpSrv.Echo().Group("/api/v1")
 	authHttp.RegisterHandlers(apiGroup, authHandler)
 	authHttp.RegisterUserRoutes(apiGroup, userHandler)
 	blogHttp.RegisterHandlers(apiGroup, blogHandler)
 
-	// Start Server
+	// Initialize gRPC Handlers
+	authGrpcHandler := authGrpc.NewAuthServer(authSvc)
+	userGrpcHandler := userGrpc.NewUserServer(userSvc)
+	blogGrpcHandler := blogGrpc.NewBlogServer(blogSvc)
+
+	// Initialize gRPC Server
+	grpcSrv := server.NewGRPCServer(authGrpcHandler, userGrpcHandler, blogGrpcHandler)
+
+	// Initialize gRPC Gateway
+	grpcAddr := "localhost:9090"
+	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("failed to connect to gRPC server: %v", err)
+	}
+	defer conn.Close()
+
+	gateway, err := server.NewGRPCGateway(grpcAddr, conn)
+	if err != nil {
+		log.Fatalf("failed to create gRPC gateway: %v", err)
+	}
+
+	// Start Servers
 	go func() {
-		if err := srv.Start(":8080"); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("shutting down the server: %v", err)
+		if err := httpSrv.Start(":8080"); err != nil {
+			log.Fatalf("HTTP server error: %v", err)
 		}
 	}()
+
+	go func() {
+		if err := grpcSrv.Start(9090); err != nil {
+			log.Fatalf("gRPC server error: %v", err)
+		}
+	}()
+
+	go func() {
+		if err := gateway.Start(8081); err != nil {
+			log.Fatalf("gRPC gateway error: %v", err)
+		}
+	}()
+
+	fmt.Println("Servers started successfully:")
+	fmt.Printf("- HTTP server: http://localhost:8080\n")
+	fmt.Printf("- gRPC server: grpc://localhost:9090\n")
+	fmt.Printf("- gRPC gateway: http://localhost:8081\n")
 
 	// Graceful Shutdown
 	quit := make(chan os.Signal, 1)
@@ -101,7 +142,22 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := srv.Echo().Shutdown(ctx); err != nil {
-		log.Fatal(err)
+	fmt.Println("\nShutting down servers...")
+
+	// Shutdown HTTP server
+	if err := httpSrv.Echo().Shutdown(ctx); err != nil {
+		log.Fatalf("HTTP server shutdown error: %v", err)
 	}
+
+	// Shutdown gRPC gateway
+	if err := gateway.Stop(ctx); err != nil {
+		log.Fatalf("gRPC gateway shutdown error: %v", err)
+	}
+
+	// Shutdown gRPC server
+	if err := grpcSrv.Stop(ctx); err != nil {
+		log.Fatalf("gRPC server shutdown error: %v", err)
+	}
+
+	fmt.Println("All servers shutdown successfully")
 }

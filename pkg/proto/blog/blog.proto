@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package blog.v1;
+
+option go_package = "github.com/ming-0x0/yuan/pkg/proto/blog/v1;blogv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// BlogService handles blog operations
+service BlogService {
+  // Get a blog post by ID
+  rpc GetBlog(GetBlogRequest) returns (Blog) {
+    option (google.api.http) = {
+      get: "/api/v1/blogs/{id}"
+    };
+  }
+
+  // List all blog posts
+  rpc ListBlogs(ListBlogsRequest) returns (ListBlogsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/blogs"
+    };
+  }
+
+  // Create a new blog post
+  rpc CreateBlog(CreateBlogRequest) returns (Blog) {
+    option (google.api.http) = {
+      post: "/api/v1/blogs"
+      body: "*"
+    };
+  }
+
+  // Update an existing blog post
+  rpc UpdateBlog(UpdateBlogRequest) returns (Blog) {
+    option (google.api.http) = {
+      put: "/api/v1/blogs/{id}"
+      body: "*"
+    };
+  }
+
+  // Delete a blog post
+  rpc DeleteBlog(DeleteBlogRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/blogs/{id}"
+    };
+  }
+}
+
+// Blog represents a blog post
+message Blog {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string author_id = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+// GetBlogRequest contains blog ID
+message GetBlogRequest {
+  string id = 1;
+}
+
+// ListBlogsRequest contains pagination parameters
+message ListBlogsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+// ListBlogsResponse contains list of blogs and pagination info
+message ListBlogsResponse {
+  repeated Blog blogs = 1;
+  int32 total_pages = 2;
+  int32 total_items = 3;
+  int32 current_page = 4;
+}
+
+// CreateBlogRequest contains blog creation data
+message CreateBlogRequest {
+  string title = 1;
+  string content = 2;
+}
+
+// UpdateBlogRequest contains blog update data
+message UpdateBlogRequest {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+}
+
+// DeleteBlogRequest contains blog ID
+message DeleteBlogRequest {
+  string id = 1;
+}

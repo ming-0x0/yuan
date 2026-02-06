@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package iam.v1;
+
+option go_package = "github.com/ming-0x0/yuan/pkg/proto/iam/v1;iamv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// AuthService handles authentication operations
+service AuthService {
+  // Register a new user
+  rpc Register(RegisterRequest) returns (RegisterResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/register"
+      body: "*"
+    };
+  }
+
+  // Login user with email and password
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/login"
+      body: "*"
+    };
+  }
+}
+
+// RegisterRequest contains user registration data
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string full_name = 3;
+}
+
+// RegisterResponse contains registration result
+message RegisterResponse {
+  string message = 1;
+}
+
+// LoginRequest contains login credentials
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+// LoginResponse contains login result with token
+message LoginResponse {
+  string access_token = 1;
+  string token_type = 2;
+  int64 expires_in = 3;
+}

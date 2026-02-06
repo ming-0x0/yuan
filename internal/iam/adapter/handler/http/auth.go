@@ -18,8 +18,9 @@ func NewAuthHandler(authService auth.AuthService) *AuthHandler {
 }
 
 type registerRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	FullName  string `json:"full_name"`
 }
 
 func (h *AuthHandler) Register(c echo.Context) error {
@@ -28,7 +29,7 @@ func (h *AuthHandler) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err := h.authService.Register(c.Request().Context(), req.Email, req.Password); err != nil {
+	if err := h.authService.Register(c.Request().Context(), req.Email, req.Password, req.FullName); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

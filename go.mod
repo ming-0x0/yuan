@@ -9,6 +9,7 @@ tool (
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.21.0
 	github.com/labstack/echo-jwt/v4 v4.4.0
 	github.com/labstack/echo/v4 v4.15.0
 	github.com/lib/pq v1.10.9
@@ -17,6 +18,9 @@ require (
 	github.com/uptrace/bun v1.2.16
 	github.com/uptrace/bun/dialect/pgdialect v1.2.16
 	golang.org/x/crypto v0.47.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20240903143218-8af14fe29dc1
+	google.golang.org/grpc v1.68.0
+	google.golang.org/protobuf v1.35.0
 )
 
 require (
@@ -48,5 +52,5 @@ require (
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
 )

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package iam.v1;
+
+option go_package = "github.com/ming-0x0/yuan/pkg/proto/iam/v1;iamv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// UserService handles user profile operations
+service UserService {
+  // Get user profile
+  rpc GetProfile(google.protobuf.Empty) returns (GetProfileResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/me"
+    };
+  }
+
+  // Update user profile
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/me"
+      body: "*"
+    };
+  }
+}
+
+// GetProfileResponse contains user profile data
+message GetProfileResponse {
+  string id = 1;
+  string email = 2;
+  string full_name = 3;
+}
+
+// UpdateProfileRequest contains user profile update data
+message UpdateProfileRequest {
+  string full_name = 1;
+}
+
+// UpdateProfileResponse contains update result
+message UpdateProfileResponse {
+  string message = 1;
+}

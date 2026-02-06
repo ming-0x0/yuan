@@ -19,16 +19,19 @@ type account struct {
 	ID             id.ID
 	Email          string
 	HashedPassword string
+	FullName       string
 }
 
 func New(
 	email string,
 	hashedPassword string,
+	fullName string,
 ) (Account, error) {
 	account := &account{
 		ID:             id.MustNew(),
 		Email:          email,
 		HashedPassword: hashedPassword,
+		FullName:       fullName,
 	}
 
 	if err := account.validate(); err != nil {
@@ -42,11 +45,13 @@ func FromRepository(
 	id id.ID,
 	email string,
 	hashedPassword string,
+	fullName string,
 ) (Account, error) {
 	account := &account{
 		ID:             id,
 		Email:          email,
 		HashedPassword: hashedPassword,
+		FullName:       fullName,
 	}
 
 	if err := account.validate(); err != nil {

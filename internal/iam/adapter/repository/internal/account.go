@@ -10,5 +10,6 @@ type Account struct {
 	ID            int64  `bun:"id,pk,type:bigint"`
 	Email         string `bun:"email,notnull,type:varchar(265),unique"`
 	Password      string `bun:"password,notnull,type:varchar(255)"`
+	FullName      string `bun:"full_name,type:varchar(255)"`
 	model.MetadataWithDeletedAt
 }

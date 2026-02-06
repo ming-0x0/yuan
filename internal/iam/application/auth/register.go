@@ -9,7 +9,7 @@ import (
 	"github.com/ming-0x0/yuan/internal/iam/domain/account"
 )
 
-func (s *authService) Register(ctx context.Context, email string, password string) error {
+func (s *authService) Register(ctx context.Context, email string, password string, fullName string) error {
 	acc, err := s.accountRepo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, account.ErrAccountNotFound) {
 		return err
@@ -25,7 +25,7 @@ func (s *authService) Register(ctx context.Context, email string, password strin
 		return err
 	}
 
-	acc, err = account.New(email, string(hashedPassword))
+	acc, err = account.New(email, string(hashedPassword), fullName)
 	if err != nil {
 		return err
 	}

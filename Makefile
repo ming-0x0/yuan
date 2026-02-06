@@ -1,3 +1,36 @@
+.PHONY: proto-gen iam-proto blog-proto
+# Generate all proto files
+proto-gen: iam-proto blog-proto
+
+# Generate IAM service proto files
+iam-proto:
+	@echo "Generating IAM service proto files..."
+	@mkdir -p pkg/proto/iam/v1
+	@protoc --go_out=./ \
+		--go-grpc_out=./ \
+		--grpc-gateway_out=./ \
+		--grpc-gateway_opt=paths=source_relative \
+		--go_opt=paths=source_relative \
+		--go-grpc_opt=paths=source_relative \
+		-I ./ \
+		-I ./google \
+		pkg/proto/iam/auth.proto \
+		pkg/proto/iam/user.proto
+
+# Generate Blog service proto files
+blog-proto:
+	@echo "Generating Blog service proto files..."
+	@mkdir -p pkg/proto/blog/v1
+	@protoc --go_out=./ \
+		--go-grpc_out=./ \
+		--grpc-gateway_out=./ \
+		--grpc-gateway_opt=paths=source_relative \
+		--go_opt=paths=source_relative \
+		--go-grpc_opt=paths=source_relative \
+		-I ./ \
+		-I ./google \
+		pkg/proto/blog/blog.proto
+
 .PHONY: goose-up goose-down-to goose-create goose-down
 goose-up:
 	@echo "Applying migrations..."
