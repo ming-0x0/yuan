@@ -28,9 +28,6 @@ func New(client *client.Client, logger logger.Logger) *accountRepository {
 func (r *accountRepository) Create(ctx context.Context, account account.Account) error {
 	acc := ToInternal(account)
 
-	acc.CreatedBy = account.ID.Int64()
-	acc.UpdatedBy = account.ID.Int64()
-
 	_, err := r.client.DB(ctx).NewInsert().Model(acc).Exec(ctx)
 	if err != nil {
 		return err
@@ -69,7 +66,6 @@ func (r *accountRepository) FindByID(ctx context.Context, id id.ID) (account.Acc
 
 func (r *accountRepository) Update(ctx context.Context, account account.Account) error {
 	acc := ToInternal(account)
-	acc.UpdatedBy = account.ID.Int64()
 
 	_, err := r.client.DB(ctx).NewUpdate().Model(acc).WherePK().Exec(ctx)
 	if err != nil {

@@ -1,11 +1,11 @@
-package postgres
+package mysql
 
 import (
 	"database/sql"
 	"fmt"
 	"time"
 
-	_ "github.com/lib/pq"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type config struct {
@@ -16,10 +16,10 @@ type config struct {
 	connMaxIdleTime int
 }
 
-func WithDSN(host string, port int, user string, password string, dbName string, sslMode string) option {
+func WithDSN(host string, port int, user string, password string, dbName string) option {
 	return func(cfg *config) {
-		cfg.dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-			host, port, user, password, dbName, sslMode)
+		cfg.dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4_general_ci&parseTime=True&loc=Local",
+			user, password, host, port, dbName)
 	}
 }
 
@@ -61,7 +61,7 @@ func New(opts ...option) (*sql.DB, error) {
 	}
 
 	// open the database connection pool
-	db, err := sql.Open("postgres", cfg.dsn)
+	db, err := sql.Open("mysql", cfg.dsn)
 	if err != nil {
 		return nil, err
 	}
