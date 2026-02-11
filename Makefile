@@ -84,7 +84,7 @@ lint-fix:
 build:
 	@go build -v ./...
 
-.PHONY: docker-local-up docker-local-down docker-dev-up docker-dev-down docker-up docker-down docker-logs
+.PHONY: docker-local-up docker-local-down docker-local-rebuild
 # Docker Compose commands for local environment
 docker-local-up:
 	@echo "Starting local environment..."
@@ -94,47 +94,9 @@ docker-local-down:
 	@echo "Stopping local environment..."
 	@cd deployments/compose && docker-compose -f docker-compose.local.yaml down
 
-docker-local-logs:
-	@cd deployments/compose && docker-compose -f docker-compose.local.yaml logs -f
-
 docker-local-rebuild:
 	@echo "Rebuilding and starting local environment..."
 	@cd deployments/compose && docker-compose -f docker-compose.local.yaml --env-file .env.local up -d --build
-
-# Docker Compose commands for dev environment
-docker-dev-up:
-	@echo "Starting dev environment..."
-	@cd deployments/compose && docker-compose -f docker-compose.dev.yaml --env-file .env.dev up -d
-
-docker-dev-down:
-	@echo "Stopping dev environment..."
-	@cd deployments/compose && docker-compose -f docker-compose.dev.yaml down
-
-docker-dev-logs:
-	@cd deployments/compose && docker-compose -f docker-compose.dev.yaml logs -f
-
-docker-dev-rebuild:
-	@echo "Rebuilding and starting dev environment..."
-	@cd deployments/compose && docker-compose -f docker-compose.dev.yaml --env-file .env.dev up -d --build
-
-# Docker Compose commands for base environment
-docker-up:
-	@echo "Starting base environment..."
-	@cd deployments/compose && docker-compose up -d
-
-docker-down:
-	@echo "Stopping base environment..."
-	@cd deployments/compose && docker-compose down
-
-docker-logs:
-	@cd deployments/compose && docker-compose logs -f
-
-# Clean all docker resources
-docker-clean:
-	@echo "Cleaning all docker resources..."
-	@cd deployments/compose && docker-compose -f docker-compose.local.yaml down -v
-	@cd deployments/compose && docker-compose -f docker-compose.dev.yaml down -v
-	@cd deployments/compose && docker-compose down -v
 
 # Allow Makefile to accept arguments directly
 %:
