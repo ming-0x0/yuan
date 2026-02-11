@@ -20,9 +20,9 @@ func (e Env) IsProd() bool {
 }
 
 type Config struct {
-	Env      Env             `toml:"env" mapstructure:"env"`
-	Logger   *LoggerConfig   `toml:"logger" mapstructure:"logger"`
-	Postgres *PostgresConfig `toml:"postgres" mapstructure:"postgres"`
+	Env    Env           `toml:"env" mapstructure:"env"`
+	Logger *LoggerConfig `toml:"logger" mapstructure:"logger"`
+	MySQL  *MySQLConfig  `toml:"mysql" mapstructure:"mysql"`
 }
 
 func LoadConfig() (*Config, error) {

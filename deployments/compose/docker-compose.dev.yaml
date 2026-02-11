@@ -1,0 +1,85 @@
+services:
+  mysql:
+    image: mysql:9
+    container_name: yuan-mysql-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-devRootPassword123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-yuan}
+      MYSQL_USER: ${MYSQL_USER:-yuan}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devPassword123}
+    ports:
+      - "3307:3306" # Different port to avoid conflicts
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    networks:
+      - yuan-dev-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${MYSQL_ROOT_PASSWORD:-devRootPassword123}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    image: ${DOCKER_IMAGE:-your-dockerhub-username/yuan:dev}
+    container_name: yuan-app-dev
+    environment:
+      - ENV=dev
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=${MYSQL_USER:-yuan}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-devPassword123}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-yuan}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    ports:
+      - "8081:8080" # Different port for dev environment
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - yuan-dev-network
+    command: ["/app/standalone"]
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Adminer for database management in dev
+  adminer:
+    image: adminer:latest
+    container_name: yuan-adminer-dev
+    ports:
+      - "8082:8080"
+    networks:
+      - yuan-dev-network
+    environment:
+      - ADMINER_DEFAULT_SERVER=mysql
+    restart: unless-stopped
+
+networks:
+  yuan-dev-network:
+    driver: bridge
+
+volumes:
+  mysql_dev_data:

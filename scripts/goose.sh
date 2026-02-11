@@ -1,9 +1,13 @@
 #!/bin/bash
+set -e
 
-# Migration directory
-GOOSE_DRIVER="postgres"
-GOOSE_MIGRATION_DIR="infrastructure/database/postgres/migrations"
-GOOSE_DBSTRING="postgres://yuan:password@localhost:5432/yuan?sslmode=disable"
+# Load environment variables from .env file
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+else
+    echo ".env file not found. Please create a .env file with the necessary variables."
+    exit 1
+fi
 
 # Check if Goose is installed
 if ! command -v goose &> /dev/null
@@ -15,24 +19,24 @@ fi
 # Run Goose commands
 case "$1" in
     up)
-        goose -dir $GOOSE_MIGRATION_DIR $GOOSE_DRIVER $GOOSE_DBSTRING up
+        goose -dir $MIGRATION_DIR mysql "$DB_USER:$DB_PASS@tcp($DB_HOST:$DB_PORT)/$DB_NAME" up
         ;;
     down)
-        goose -dir $GOOSE_MIGRATION_DIR $GOOSE_DRIVER $GOOSE_DBSTRING down
+        goose -dir $MIGRATION_DIR mysql "$DB_USER:$DB_PASS@tcp($DB_HOST:$DB_PORT)/$DB_NAME" down
         ;;
     create)
         if [ -z "$2" ]; then
             echo "Please provide a name for the migration."
             exit 1
         fi
-        goose -s -dir $GOOSE_MIGRATION_DIR $GOOSE_DRIVER $GOOSE_DBSTRING create "$2" sql
+        goose -s -dir $MIGRATION_DIR create "$2" sql
         ;;
     down-to)
         if [ -z "$2" ]; then
             echo "Please provide a version to rollback to."
             exit 1
         fi
-        goose -dir $GOOSE_MIGRATION_DIR $GOOSE_DRIVER $GOOSE_DBSTRING down-to $2
+        goose -dir $MIGRATION_DIR mysql "$DB_USER:$DB_PASS@tcp($DB_HOST:$DB_PORT)/$DB_NAME" down-to $2
         ;;
     *)
         echo "Usage: $0 {up|down|create migration_name|down-to version}"

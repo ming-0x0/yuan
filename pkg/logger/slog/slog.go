@@ -124,7 +124,7 @@ func (l *Logger) log(ctx context.Context, level slog.Level, msg string, keyVals 
 		}
 	}
 
-	l.Logger.Log(ctx, level, msg, attrs...)
+	l.Log(ctx, level, msg, attrs...)
 }
 
 // Panic logs a message with level Panic on the logger then calls panic()

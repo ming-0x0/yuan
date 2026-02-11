@@ -1,0 +1,10 @@
+# Environment files - contain sensitive data
+.env
+.env.local
+.env.dev
+.env.production
+
+# Docker volumes
+mysql_data/
+mysql_local_data/
+mysql_dev_data/
