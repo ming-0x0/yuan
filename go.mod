@@ -10,6 +10,7 @@ tool (
 require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/lib/pq v1.11.2
+	github.com/sony/sonyflake/v2 v2.2.0
 	github.com/spf13/viper v1.21.0
 	github.com/uptrace/bun v1.2.16
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.16

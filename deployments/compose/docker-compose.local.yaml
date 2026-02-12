@@ -25,9 +25,41 @@ services:
       timeout: 5s
       retries: 5
 
+  app:
+    build:
+      context: ../..
+      dockerfile: build/package/standalone/Dockerfile
+      target: development
+    container_name: yuan-app-local
+    restart: unless-stopped
+    environment:
+      - ENV=local
+      - MYSQL_HOST=mysql-local
+      - MYSQL_PORT=3306
+      - MYSQL_USER=${MYSQL_USER:-yuan}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-yuan}
+      - LOG_LEVEL=debug
+    ports:
+      - "8080:8080"
+      - "2345:2345" # Delve debugger port
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - yuan-local-network
+    volumes:
+      - ../../:/app
+      - go_modules:/go/pkg/mod
+    working_dir: /app
+    command: ["go", "run", "cmd/standalone/main.go"]
+    stdin_open: true
+    tty: true
+
 networks:
   yuan-local-network:
     driver: bridge
 
 volumes:
   mysql_local_data:
+  go_modules:
