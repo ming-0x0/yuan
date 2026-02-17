@@ -9,14 +9,16 @@ import (
 	"github.com/ming-0x0/yuan/internal/modules/iam/domain/permissiongroup"
 )
 
-type Status int
+type Status uint8
 
 const (
-	StatusActive  Status = 1
-	StatusBlocked Status = 2
+	Activate Status = 1
+	Inactive Status = 2
 )
 
-type User struct {
+type User = *user
+
+type user struct {
 	ID              id.ID
 	FullName        string
 	Email           string
@@ -32,7 +34,7 @@ func New(
 	fullName, email, username, password string,
 	isAdmin bool,
 	pg *permissiongroup.PermissionGroup,
-) (*User, error) {
+) (User, error) {
 	if strings.TrimSpace(fullName) == "" {
 		return nil, domain.ErrRequiredField
 	}
@@ -46,20 +48,20 @@ func New(
 		return nil, domain.ErrInvalidFormat
 	}
 
-	return &User{
+	return &user{
 		ID:              id.MustNew(),
 		FullName:        fullName,
 		Email:           email,
 		Username:        username,
 		Password:        password,
 		IsAdmin:         isAdmin,
-		Status:          StatusActive,
+		Status:          Activate,
 		ReceiveEmail:    true,
 		PermissionGroup: pg,
 	}, nil
 }
 
-func (u *User) HasPermission(code string) bool {
+func (u User) HasPermission(code string) bool {
 	if u.IsAdmin {
 		return true
 	}
@@ -77,14 +79,14 @@ func (u *User) HasPermission(code string) bool {
 	return false
 }
 
-func (u *User) Activate() {
-	u.Status = StatusActive
+func (u User) Activate() {
+	u.Status = Activate
 }
 
-func (u *User) Block() {
-	u.Status = StatusBlocked
+func (u User) Block() {
+	u.Status = Inactive
 }
 
-func (u *User) CanLogin() bool {
-	return u.Status == StatusActive
+func (u User) CanLogin() bool {
+	return u.Status == Activate
 }

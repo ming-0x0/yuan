@@ -3,7 +3,7 @@ package domain
 import "errors"
 
 var (
-	ErrRequiredField  = errors.New("required field is missing")
+	ErrRequiredField   = errors.New("required field is missing")
 	ErrInvalidEmail    = errors.New("invalid email format")
 	ErrInvalidInternal = errors.New("internal domain error")
 	ErrInvalidFormat   = errors.New("invalid format")

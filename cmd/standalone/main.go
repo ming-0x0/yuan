@@ -12,6 +12,7 @@ import (
 
 func main() {
 	timezone.SetTimeZoneICT()
+	fmt.Println(id.MustNew())
 
 	// 1. Initialize Context Containers (Independent)
 	mediaC := mediaContainer.NewContainer()
