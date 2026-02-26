@@ -15,7 +15,7 @@ type DB struct {
 	db *bun.DB
 }
 
-func New(sqlDB *sql.DB, driver string) (*DB, error) {
+func NewDB(sqlDB *sql.DB, driver string) (*DB, error) {
 	switch driver {
 	case "postgres":
 		return &DB{

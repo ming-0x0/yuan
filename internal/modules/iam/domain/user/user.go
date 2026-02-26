@@ -1,6 +1,10 @@
 package user
 
-import "github.com/godruoyi/go-snowflake"
+import (
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"github.com/godruoyi/go-snowflake"
+)
 
 type status uint8
 
@@ -26,16 +30,32 @@ func New(
 	email string,
 	username string,
 	hashedPassword string,
+	isReceiveEmail bool,
 ) (User, error) {
-	return &user{
+	user := &user{
 		ID:             snowflake.ID(),
 		FullName:       fullName,
 		Email:          email,
 		Username:       username,
 		HashedPassword: hashedPassword,
 		Status:         active,
-		IsReceiveEmail: false,
-	}, nil
+		IsReceiveEmail: isReceiveEmail,
+	}
+	if err := user.validate(); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (u *user) validate() error {
+	return validation.ValidateStruct(u,
+		validation.Field(&u.FullName, validation.Required),
+		validation.Field(&u.Email, validation.Required, is.Email),
+		validation.Field(&u.Username, validation.Required),
+		validation.Field(&u.HashedPassword, validation.Required),
+		validation.Field(&u.Status, validation.In(active, inactive)),
+	)
 }
 
 func (u *user) CanLogin() bool {

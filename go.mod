@@ -1,6 +1,6 @@
 module github.com/ming-0x0/yuan
 
-go 1.25.7
+go 1.26
 
 tool (
 	go.uber.org/mock/mockgen
@@ -8,6 +8,7 @@ tool (
 )
 
 require (
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/godruoyi/go-snowflake v0.0.2
 	github.com/lib/pq v1.11.2
@@ -19,6 +20,7 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
